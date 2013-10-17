@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:sftp="http://www.mulesoft.org/schema/mule/sftp" xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:quartz="http://www.mulesoft.org/schema/mule/quartz" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:core="http://www.mulesoft.org/schema/mule/core" version="EE-3.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/sftp http://www.mulesoft.org/schema/mule/sftp/current/mule-sftp.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/quartz http://www.mulesoft.org/schema/mule/quartz/current/mule-quartz.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+    <flow name="mainFlow" doc:name="mainFlow">
+        <quartz:inbound-endpoint jobName="job" repeatInterval="5000" repeatCount="0" responseTimeout="10000" doc:name="Quartz - only once">
+            <quartz:event-generator-job>
+                <quartz:payload>hello</quartz:payload>
+            </quartz:event-generator-job>
+        </quartz:inbound-endpoint>
+        <logger message="ACA 1 #[payload]" level="INFO" doc:name="Logger"/>
+        <set-variable variableName="zipDirectory" value="#['/Users/matiasjuan/Downloads/devel/temp/tyrone']" doc:name="zipDirectory"/>
+        <set-variable variableName="zipFile" value="#['/Users/matiasjuan/Downloads/devel/temp/myZip.zip']" doc:name="zipFile"/>
+        <set-variable variableName="zipFileOverwrite" value="true" doc:name="zipFileOverwrite"/>
+        <component class="com.mulesoft.se.demos.ZIPDir" doc:name="Java"/>
+        <logger message="ACA 2 #[payload]" level="INFO" doc:name="Logger"/>
+    </flow>
+    <flow name="sendFileFlow" doc:name="sendFileFlow">
+        <file:inbound-endpoint path="/Users/matiasjuan/Downloads/devel/temp/files" moveToDirectory="/Users/matiasjuan/Downloads/devel/temp/processed" responseTimeout="10000" doc:name="File"/>
+        <sftp:outbound-endpoint exchange-pattern="one-way" host="localhost" port="22" responseTimeout="10000" doc:name="SFTP"/>
+    </flow>
+</mule>
